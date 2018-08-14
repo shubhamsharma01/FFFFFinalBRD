@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	http://www.springframework.org/schema/security
+	http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+<beans:import resource="dispatcher-servlet.xml"/>
+<http auto-config="true">
+<intercept-url pattern="/login" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+<intercept-url pattern="/loginfailure" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+<!-- <intercept-url pattern="/*" access="ROLE_MAKER,ROLE_CHECKER"/> -->
+
+
+<intercept-url pattern="/*" access="ROLE_USER,ROLE_ADMIN"/>
+
+
+<access-denied-handler error-page="/accdenied"/>
+<form-login login-page="/login" authentication-failure-url="/loginfailure" default-target-url="/defaultpage" always-use-default-target="true"/>
+<logout logout-success-url="/login"/>
+
+</http>
+
+<beans:bean id="ds1" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+ <beans:property name="username" value="sh"></beans:property>
+ <beans:property name="password" value="sh"></beans:property>
+ <beans:property name="url" value="jdbc:Oracle:thin:@10.1.50.198:1521:orcl"></beans:property>
+ <beans:property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"></beans:property>
+ 
+ </beans:bean>
+
+<beans:bean id="pwdEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+<authentication-manager>
+<authentication-provider>
+<password-encoder ref="pwdEncoder"/>
+<jdbc-user-service data-source-ref="ds" 
+
+ users-by-username-query="select username,password,enabled,roleid from Final_BRD_User where username=?"
+ authorities-by-username-query="select username,rolename from Final_BRD_User INNER join Final_BRD_Role on Final_BRD_User.roleid=Final_BRD_Role.roleid where Final_BRD_User.username=?"/>
+	
+
+<!-- <user-service>
+<user name="user1" password="$2a$10$yWWilUHV0VErYQM772zjoOrgH7hXN31N2sFktubP90xYTuanlDqPi" authorities="ROLE_USER"/>
+<user name="user2" password="$2a$10$wQ2K0uGhoIzBRFGaeg5iX.xvu5qOECLvnIUeCCNUJCXw1NBBZydh6" authorities="ROLE_ADMIN"/>
+</user-service> -->
+</authentication-provider>
+
+</authentication-manager>
+
+</beans:beans>
